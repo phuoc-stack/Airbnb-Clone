@@ -1,6 +1,6 @@
 const express=require("express")
 const cors=require("cors")
-const { default: mongoose } = require("mongoose")
+const mongoose = require("mongoose")
 const User = require("./models/User")
 const Place=require("./models/Place")
 const bcrypt = require("bcryptjs")
