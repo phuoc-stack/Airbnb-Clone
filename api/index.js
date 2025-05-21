@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
@@ -32,7 +34,7 @@ app.get('/test', (req, res) => {
 
 function getUserDataFromReq(req) {
     return new Promise((resolve, reject) => {
-        jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
+        jwt.verify(req.cookies.token, process.env.JWT_SECRET, {}, async (err, userData) => {
             if (err) throw err;
             resolve(userData)
         })
@@ -64,7 +66,14 @@ app.post("/login", async (req, res) => {
                 id: userDoc._id,
             }, jwtSecret, {}, (err, token) => {
                 if (err) throw err;
-                res.cookie('token', token).json(userDoc)
+
+                // Define cookie options with enhanced security
+                const cookieOptions = {
+                    httpOnly: true,             
+                    sameSite: 'lax',         
+                    maxAge: 30 * 24 * 60 * 60 * 1000 
+                };
+                res.cookie('token', token, cookieOptions).json(userDoc)
             })
         } else {
             res.status(422).json('pass not ok')
@@ -88,8 +97,12 @@ app.get("/profile", (req, res) => {
 })
 
 app.post('/logout', (req, res) => {
-    res.cookie('token', '').json(true)
-})
+    res.cookie('token', '', {
+        httpOnly: true,
+        sameSite: 'lax',
+        expires: new Date(0)
+    }).json(true);
+});
 
 app.post('/upload-by-link', async (req, res) => {
     const { link } = req.body
