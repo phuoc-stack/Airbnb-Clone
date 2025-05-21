@@ -16,8 +16,8 @@ const Booking = require("./models/Booking")
 require('dotenv').config()
 const app = express()
 
+const jwtSecret = process.env.JWT_SECRET
 const bcryptSalt = bcrypt.genSaltSync(10)
-const jwtSecret = 'abcddd'
 
 app.use(express.json())
 app.use(cors({
@@ -34,7 +34,7 @@ app.get('/test', (req, res) => {
 
 function getUserDataFromReq(req) {
     return new Promise((resolve, reject) => {
-        jwt.verify(req.cookies.token, process.env.JWT_SECRET, {}, async (err, userData) => {
+        jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
             if (err) throw err;
             resolve(userData)
         })
