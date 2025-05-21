@@ -34,12 +34,8 @@ export default function PlacesPage() {
             Add new place
           </Link>
         </div>
-      {/* {action === "new" && (
-       <PlacesFormPage />
-      )}  deleted at 3:56*/}
       <div className="mt-4">
         {places.length>0 && places.map(place=>(
-          //make sure it does not shrink below these dimensions and the grow to fill avail space in the flex container
           <Link key={place._id} to={'/account/places/'+place._id} className="flex cursor-pointer gap-4 bg-gray-100 p-4 rounded-2xl">
             <div className="flex w-36 h-36 bg-gray-300 grow shrink-0"> 
                 <PlaceImg place={place} />

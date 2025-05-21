@@ -7,15 +7,15 @@ export default function AccountNav(){
         subpage='profile'
     }
 
-    function linkClasses(type=null){//function to determine css classes for each link
-        let classes= 'inline-flex gap-1 py-2 px-6 rounded-full' //initialize base classes for padding 
+    function linkClasses(type=null){
+        let classes= 'inline-flex gap-1 py-2 px-6 rounded-full' 
         
-        if (type === subpage) {//if the link type matches current subpage or if no subpage is identified and the type is profile. first null then changed to false at 3:59
-            classes +=' bg-primary text-white'; //need to have a space after '
+        if (type === subpage) {
+            classes +=' bg-primary text-white'; 
         } else {
             classes +=' bg-gray-200';
         }
-        return classes //return computed classes
+        return classes 
     }
 
     return (

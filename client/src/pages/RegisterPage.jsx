@@ -5,14 +5,14 @@ export default function RegisterPage(){
     const [name,setName]=useState('')
     const [email,setEmail]=useState('')
     const [password,setPassword]=useState('')
-    async function registerUser(ev){ //grab the event object associated with the form submission
-        ev.preventDefault() //prevent the submission of form, reload 
+    async function registerUser(ev){ 
+        ev.preventDefault() 
         try {
-            await axios.post('/register', {//create an object containing data sent to server with name, email, password keys
+            await axios.post('/register', {
                 name,
                 email,
                 password 
-            }) //previously http://localhost:4001/test but shorten by putting to base url in App.jsx
+            }) 
             alert('Registration successful. Now you can log in')
         } catch (e) {
             alert('Registration failed. Try again later')

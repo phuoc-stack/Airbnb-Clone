@@ -6,24 +6,24 @@ import PlacesPage from "./PlacesPage";
 import AccountNav from "../AccountNav";
 
 export default function ProfilePage(){
-    const [redirect,setRedirect]=useState(null) //set state to redirect to homepage 
+    const [redirect,setRedirect]=useState(null) 
     const {ready,user,setUser}=useContext(UserContext) 
-    let {subpage}=useParams();//get the "subpage" parameter from the URL
+    let {subpage}=useParams();
     if (subpage===undefined){
         subpage="profile"
     }
 
     async function logout(){
-        await axios.post('/logout') //path to log out
-        setRedirect('/') //set state of redirect to homepage
-        setUser(null) //without this, we are still logged in 2:06. 
+        await axios.post('/logout') 
+        setRedirect('/') 
+        setUser(null) 
     }
 
     if (!ready){
-        return 'Loading...' //still loading
+        return 'Loading...' 
     }
 
-    if (ready && !user &&!redirect){ //user is null. add !!redirect at 2:09 so that we are not redirected to log in after logging out
+    if (ready && !user &&!redirect){ 
         return <Navigate to={"/login"} />
     }
     
@@ -33,13 +33,12 @@ export default function ProfilePage(){
     return(
         <div>
             <AccountNav />
-            {subpage ==='profile' &&( //in sub-page profile render following details
+            {subpage ==='profile' &&( 
                 <div className="text-center max-w-lg mx-auto">
                     Logged in as {user.name} ({user.email})<br />
                     <button onClick={logout} className="primary max-w-sm mt-2">Logout</button>
                 </div>
             )}
-            {/* account page for {user?.name} // to test, delete it later ? means optional*/}
             {subpage==='places'&&(
                 <PlacesPage />
             )}

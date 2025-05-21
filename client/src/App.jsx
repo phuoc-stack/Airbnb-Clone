@@ -32,11 +32,6 @@ function App() {
         <Route path="/place/:id" element={<PlacePage />}/>
         <Route path="/account/bookings" element={<BookingsPage />} /> 
         <Route path="/account/bookings/:id" element={<BookingPage />} /> 
-
-        {/* <Route path="/account/bookings" element={<AccountPage />}/>
-        <Route path="/account/accommodations" element={<AccountPage />}/> */}
-        {/* <Route path="/account/:subpage/:action?" element={<ProfilePage />}/> delete at 4:04 */}
-
         </Route>
       </Routes>
       </UserContextProvider>

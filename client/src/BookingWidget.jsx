@@ -4,15 +4,14 @@ import axios from "axios"
 import { Navigate } from "react-router"
 import { UserContext } from "./UserContext"
 
-export default function BookingWidget({place}){ //need to pass in place
+export default function BookingWidget({place}){ 
     const [checkIn,setCheckIn]=useState('')
     const [checkOut,setCheckOut]=useState('')
     const [numberOfGuests,setNumberOfGuests]=useState('')
     const [name,setName]=useState('')
     const [phone,setPhone]=useState('')
-    //redirect to booking
     const [redirect,setRedirect]=useState('')
-    const {user}=useContext(UserContext) // presented as user based on usecontext.jsx
+    const {user}=useContext(UserContext) 
     
     useEffect(()=>{
         if (user){
@@ -27,10 +26,10 @@ export default function BookingWidget({place}){ //need to pass in place
     async function bookThisPlace(){
         const response= await axios.post("/bookings",{
             checkIn,checkOut,numberOfGuests,name,phone,
-            place:place._id, //need to be _id
+            place:place._id, 
             price:numberOfNights*place.price
         })
-        const bookingId=response.data._id //because in index, we have just put in the whole doc
+        const bookingId=response.data._id 
         setRedirect(`/account/booking/${bookingId}`)
     }
 

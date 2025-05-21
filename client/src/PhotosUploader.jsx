@@ -23,13 +23,13 @@ export default function PhotosUploader({addedPhotos,onChange}){
             }).then(response=>{
                 const {data:filenames}=response
                 onChange(prev=>{
-                    return [...prev,...filenames];//array
+                    return [...prev,...filenames];
                 })
             })
         }
 
         function removePhoto(filename){
-          onChange([...addedPhotos.filter(photo=>photo!==filename)]) //show all photos except for this one
+          onChange([...addedPhotos.filter(photo=>photo!==filename)]) 
         }
 
         function changeMainPhoto(ev,filename){

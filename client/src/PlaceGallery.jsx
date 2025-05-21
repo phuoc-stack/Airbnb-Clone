@@ -4,7 +4,6 @@ export default function PlaceGallery({place}){
     const [showAllPhotos,setShowAllPhotos]=useState(false)
     if (showAllPhotos){
         return (
-            //mr-48 in 26 to prevent heading being hidden under the button
             <div className="absolute inset-0 bg-black text-white min-h-screen">
                 <div className="bg-black p-8 grid gap-4">
                     <div>

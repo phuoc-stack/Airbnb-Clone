@@ -12,9 +12,9 @@ export default function LoginPage(){
         ev.preventDefault();
         try {
             const response=await axios.post('/login',{email,password})
-            setUser(response.data) //1:34 analyze in react chrome to grab needed data so that context.provider only include these data
+            setUser(response.data)
             alert('Login successful')
-            setRedirect(true) //for redirecting successful logging in attempt to home page
+            setRedirect(true) 
         } catch (e){
             alert('Login failed')
         }

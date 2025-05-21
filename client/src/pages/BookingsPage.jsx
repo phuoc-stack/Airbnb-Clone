@@ -19,8 +19,6 @@ export default function BookingsPage() {
       <div>
         {bookings?.length > 0 &&
           bookings.map((booking) => (
-            //just place does not work line 21
-            //why grow in line 26
             <Link to={`/account/bookings/${booking._id}`} className="flex gap-4 bg-gray-200 rounded-2xl overflow-hidden">
               <div className="flex gap-4 w-48">
                 <PlaceImg place={booking.place} />

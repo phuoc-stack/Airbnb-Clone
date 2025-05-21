@@ -35,7 +35,7 @@ export default function PlacesFormPage(){
         setMaxGuests(data.maxGuests)
         setPrice(data.price)
       })
-    },[id]) //dependency is id of our post
+    },[id]) 
 
     function inputHeader(text) {
         return <h2 className="text-2xl mt-4">{text}</h2>;
@@ -72,7 +72,7 @@ export default function PlacesFormPage(){
       }
     
     if (redirect){
-        return <Navigate to={'/account/places'}/> //remember the first /
+        return <Navigate to={'/account/places'}/> 
     }
       
     return (
