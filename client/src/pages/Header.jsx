@@ -17,6 +17,13 @@ export default function Header() {
     }
   }
 
+  function clearSearch() {
+    setSearchQuery('');
+    if (location.pathname === '/search') {
+      navigate('/');
+    }
+  }
+
   return (
     <header className="flex flex-col sm:flex-row items-center justify-between p-4">
       <Link to={"/"} className="flex items-center gap-1">
@@ -25,22 +32,37 @@ export default function Header() {
         </svg>
         <span className="font-bold text-xl">airbnb</span>
       </Link>
-      <form onSubmit={handleSearch} className="flex gap-2 border border-gray-300 rounded-full mt-4 sm:mt-0 px-4 py-2 shadow-md items-center">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Find your next stay"
-          className="border-none outline-none bg-transparent flex-grow"
-        />
-        <button
-          type="submit"
-          className="bg-primary text-white p-1 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-          </svg>
-        </button>
-      </form>
+
+      <div className="flex-grow max-w-md mx-4 mt-4 sm:mt-0">
+        <form onSubmit={handleSearch} className="flex gap-2 border border-gray-300 rounded-full mt-4 sm:mt-0 px-4 py-2 shadow-md items-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Find your next stay"
+            className="border-none outline-none bg-transparent flex-grow"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="flex-shrink-0 bg-transparent"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+
+            </button>
+          )}
+          <button
+            type="submit"
+            className="bg-primary text-white p-1 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+          </button>
+        </form>
+      </div>
       <div className="mt-4 sm:mt-0">
         <Link to={user ? "/account" : "/login"} className="flex gap-2 rounded-full items-center border border-gray-300 py-2 px-4">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
