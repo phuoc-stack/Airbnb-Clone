@@ -3,8 +3,11 @@ import { differenceInCalendarDays } from "date-fns"
 import axios from "axios"
 import { Navigate } from "react-router"
 import { UserContext } from "./UserContext"
+import { useToast } from "./ToastContext";
+import FormError from "./FormError";
 
 export default function BookingWidget({ place }) {
+    const { addToast } = useToast();
     const [checkIn, setCheckIn] = useState('')
     const [checkOut, setCheckOut] = useState('')
     const [numberOfGuests, setNumberOfGuests] = useState('')
@@ -54,8 +57,11 @@ export default function BookingWidget({ place }) {
         }
 
         if (numberOfNights > 0) {
-            if (!name) errors.name = 'Name is required';
-            if (!phone) errors.phone = 'Phone number is required';
+            if (!name) errors.name = 'Name is required'
+            if (!phone) errors.phone = 'Phone number is required'
+            else if (!/^\d{10,15}$/.test(phone.replace(/[^0-9]/g, ''))) {
+                errors.phone = 'Please enter a valid phone number'
+            }
         }
 
         setFormErrors(errors);
@@ -63,17 +69,25 @@ export default function BookingWidget({ place }) {
     }
 
     async function bookThisPlace() {
+        if (!user) {
+            addToast('Please log in to book this place', 'info');
+            setRedirect('/login');
+            return;
+        }
+
         if (!validateBookingForm()) {
             return;
         }
 
         try {
+            setBookingInProgress(true);
             const response = await axios.post("/bookings", {
                 checkIn, checkOut, numberOfGuests, name, phone,
                 place: place._id,
                 price: numberOfNights * place.price
             })
             const bookingId = response.data._id
+            addToast('Booking successful!', 'success')
             setRedirect(`/account/bookings/${bookingId}`)
         } catch (error) {
             if (error.response && error.response.data && error.response.data.errors) {
@@ -84,8 +98,10 @@ export default function BookingWidget({ place }) {
                 });
                 setFormErrors(serverErrors);
             } else {
-                alert('Booking failed. Please try again.');
+                addToast('Booking failed. Please try again.', 'error');
             }
+        } finally {
+            setBookingInProgress(false);
         }
     }
 
@@ -94,89 +110,79 @@ export default function BookingWidget({ place }) {
     }
     return (
         <div className="bg-white shadow p-4 rounded-2xl">
-          <div className="text-xl sm:text-2xl text-center">
-            Price: ${place.price} / night
-          </div>
-          <div className="border rounded-2xl mt-4">
-            <div className="flex flex-col sm:flex-row">
-              <div className="py-3 px-4 w-full">
-                <label className="block mb-1">Check in:</label>
-                <input 
-                  type="date" 
-                  value={checkIn}
-                  onChange={ev => setCheckIn(ev.target.value)}
-                  className="w-full"
-                />
-                {formErrors.checkIn && (
-                  <div className="text-red-500 text-sm mt-1">{formErrors.checkIn}</div>
-                )}
-              </div>
-              <div className="py-3 px-4 border-t sm:border-t-0 sm:border-l w-full">
-                <label className="block mb-1">Check out:</label>
-                <input 
-                  type="date" 
-                  value={checkOut}
-                  onChange={ev => setCheckOut(ev.target.value)}
-                  className="w-full"
-                />
-                {formErrors.checkOut && (
-                  <div className="text-red-500 text-sm mt-1">{formErrors.checkOut}</div>
-                )}
-              </div>
+            <div className="text-xl sm:text-2xl text-center">
+                Price: ${place.price} / night
             </div>
-            <div className="py-3 px-4 border-t">
-              <label className="block mb-1">Number of guests:</label>
-              <input 
-                type="number" 
-                value={numberOfGuests}
-                min={1}
-                max={place.maxGuests || 10}
-                onChange={ev => setNumberOfGuests(parseInt(ev.target.value))}
-                className="w-full"
-              />
-              {formErrors.numberOfGuests && (
-                <div className="text-red-500 text-sm mt-1">{formErrors.numberOfGuests}</div>
-              )}
-            </div>
-            {numberOfNights > 0 && (
-              <div className="py-3 px-4 border-t">
-                <label className="block mb-1">Your full name:</label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={ev => setName(ev.target.value)}
-                  className="w-full"
-                />
-                {formErrors.name && (
-                  <div className="text-red-500 text-sm mt-1">{formErrors.name}</div>
-                )}
-                <label className="block mb-1 mt-3">Your phone number:</label>
-                <input 
-                  type="tel" 
-                  value={phone}
-                  onChange={ev => setPhone(ev.target.value)}
-                  className="w-full"
-                />
-                {formErrors.phone && (
-                  <div className="text-red-500 text-sm mt-1">{formErrors.phone}</div>
-                )}
-              </div>
-            )}
-          </div>
-          <button 
-            onClick={bookThisPlace} 
-            disabled={bookingInProgress}
-            className={`primary mt-4 w-full py-3 ${bookingInProgress ? 'opacity-70 cursor-not-allowed' : ''}`}
-          >
-            {bookingInProgress ? 'Booking...' : (
-              <>
-                Book this place
+            <div className="border rounded-2xl mt-4">
+                <div className="flex flex-col sm:flex-row">
+                    <div className="py-3 px-4 w-full">
+                        <label className="block mb-1">Check in:</label>
+                        <input
+                            type="date"
+                            value={checkIn}
+                            onChange={ev => setCheckIn(ev.target.value)}
+                            className="w-full"
+                        />
+                        <FormError message={formErrors.checkIn} />
+                    </div>
+                    <div className="py-3 px-4 border-t sm:border-t-0 sm:border-l w-full">
+                        <label className="block mb-1">Check out:</label>
+                        <input
+                            type="date"
+                            value={checkOut}
+                            onChange={ev => setCheckOut(ev.target.value)}
+                            className="w-full"
+                        />
+                        <FormError message={formErrors.checkOut} />
+                    </div>
+                </div>
+                <div className="py-3 px-4 border-t">
+                    <label className="block mb-1">Number of guests:</label>
+                    <input
+                        type="number"
+                        value={numberOfGuests}
+                        min={1}
+                        max={place.maxGuests || 10}
+                        onChange={ev => setNumberOfGuests(parseInt(ev.target.value))}
+                        className="w-full"
+                    />
+                    <FormError message={formErrors.numberOfGuests} />
+                </div>
                 {numberOfNights > 0 && (
-                  <span> ${numberOfNights * place.price}</span>
+                    <div className="py-3 px-4 border-t">
+                        <label className="block mb-1">Your full name:</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={ev => setName(ev.target.value)}
+                            className="w-full"
+                        />
+                        <FormError message={formErrors.name} />
+                        <label className="block mb-1 mt-3">Your phone number:</label>
+                        <input
+                            type="tel"
+                            value={phone}
+                            onChange={ev => setPhone(ev.target.value)}
+                            className="w-full"
+                        />
+                        <FormError message={formErrors.phone} />
+                    </div>
                 )}
-              </>
-            )}
-          </button>
+            </div>
+            <button
+                onClick={bookThisPlace}
+                disabled={bookingInProgress}
+                className={`primary mt-4 w-full py-3 ${bookingInProgress ? 'opacity-70 cursor-not-allowed' : ''}`}
+            >
+                {bookingInProgress ? 'Booking...' : (
+                    <>
+                        Book this place
+                        {numberOfNights > 0 && (
+                            <span> ${numberOfNights * place.price}</span>
+                        )}
+                    </>
+                )}
+            </button>
         </div>
-      );
-    }
+    );
+}
