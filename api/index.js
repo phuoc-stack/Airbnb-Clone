@@ -266,4 +266,44 @@ app.get('/bookings', async (req, res) => {
     res.json(await Booking.find({ user: userData.id }).populate('place'))
 })
 
+app.get("/search-places", async (req, res) => {
+    try {
+      const { query, minPrice, maxPrice, perks } = req.query;
+      
+      // Build the search conditions
+      let searchConditions = {};
+      
+      // Text search in title or address
+      if (query) {
+        searchConditions.$or = [
+          { title: { $regex: query, $options: 'i' } },
+          { address: { $regex: query, $options: 'i' } },
+          { description: { $regex: query, $options: 'i' } }
+        ];
+      }
+      
+      // Price range
+      if (minPrice !== undefined || maxPrice !== undefined) {
+        searchConditions.price = {};
+        if (minPrice !== undefined) searchConditions.price.$gte = parseInt(minPrice);
+        if (maxPrice !== undefined) searchConditions.price.$lte = parseInt(maxPrice);
+      }
+      
+      // Perks/amenities
+      if (perks && perks.length) {
+        const perksArray = Array.isArray(perks) ? perks : [perks];
+        searchConditions.perks = { $all: perksArray };
+      }
+      
+      const places = await Place.find(searchConditions).limit(50);
+      res.json(places);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Error searching places", 
+        error: error.message 
+      });
+    }
+});
+  
 app.listen(4001)

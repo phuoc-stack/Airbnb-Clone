@@ -11,6 +11,7 @@ export default function BookingWidget({ place }) {
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [redirect, setRedirect] = useState('')
+    const [bookingInProgress, setBookingInProgress] = useState(false);
     const { user } = useContext(UserContext)
     const [formErrors, setFormErrors] = useState({});
 

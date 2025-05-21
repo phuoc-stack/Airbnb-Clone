@@ -128,7 +128,9 @@ export default function PlacesFormPage() {
               onChange={(ev) => setPrice(ev.target.value)} />
           </div>
         </div>
-        <button className="primary my-4">Save</button>
+        <div className="flex justify-center mt-4 mb-8">
+          <button className=" primary my-4 py-2 px-6 max-w-xs mx-auto">Save</button>
+        </div>
       </form>
     </div>
   )
