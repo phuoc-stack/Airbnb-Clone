@@ -93,50 +93,89 @@ export default function BookingWidget({ place }) {
     }
     return (
         <div className="bg-white shadow p-4 rounded-2xl">
-            <div className="text-2xl text-center">
-                Price: ${place.price} / per night
-            </div>
-            <div className="border rounded-2xl mt-4 ">
-                <div className="flex">
-                    <div className="py-3 px-4">
-                        <label>Check in:</label>
-                        <input type="date"
-                            value={checkIn}
-                            onChange={ev => setCheckIn(ev.target.value)} />
-                        {formErrors.checkIn && <div className="text-red-500 text-sm">{formErrors.checkIn}</div>}
-                    </div>
-                    <div className="py-3 px-4 border-t">
-                        <label>Check out:</label>
-                        <input type="date"
-                            value={checkOut}
-                            onChange={ev => setCheckOut(ev.target.value)} />
-                    </div>
-                </div>
-                <div className="py-3 px-4 border-t">
-                    <label>Number of guests:</label>
-                    <input type="number"
-                        value={numberOfGuests}
-                        onChange={ev => setNumberOfGuests(ev.target.value)} />
-                </div>
-                {numberOfNights > 0 && (
-                    <div className="py-3 px-4 border-t">
-                        <label>Your full name:</label>
-                        <input type="text"
-                            value={name}
-                            onChange={ev => setName(ev.target.value)} />
-                        <label>Your phone number:</label>
-                        <input type="tel"
-                            value={phone}
-                            onChange={ev => setPhone(ev.target.value)} />
-                    </div>
+          <div className="text-xl sm:text-2xl text-center">
+            Price: ${place.price} / night
+          </div>
+          <div className="border rounded-2xl mt-4">
+            <div className="flex flex-col sm:flex-row">
+              <div className="py-3 px-4 w-full">
+                <label className="block mb-1">Check in:</label>
+                <input 
+                  type="date" 
+                  value={checkIn}
+                  onChange={ev => setCheckIn(ev.target.value)}
+                  className="w-full"
+                />
+                {formErrors.checkIn && (
+                  <div className="text-red-500 text-sm mt-1">{formErrors.checkIn}</div>
                 )}
+              </div>
+              <div className="py-3 px-4 border-t sm:border-t-0 sm:border-l w-full">
+                <label className="block mb-1">Check out:</label>
+                <input 
+                  type="date" 
+                  value={checkOut}
+                  onChange={ev => setCheckOut(ev.target.value)}
+                  className="w-full"
+                />
+                {formErrors.checkOut && (
+                  <div className="text-red-500 text-sm mt-1">{formErrors.checkOut}</div>
+                )}
+              </div>
             </div>
-            <button onClick={bookThisPlace} className="primary mt-4">
+            <div className="py-3 px-4 border-t">
+              <label className="block mb-1">Number of guests:</label>
+              <input 
+                type="number" 
+                value={numberOfGuests}
+                min={1}
+                max={place.maxGuests || 10}
+                onChange={ev => setNumberOfGuests(parseInt(ev.target.value))}
+                className="w-full"
+              />
+              {formErrors.numberOfGuests && (
+                <div className="text-red-500 text-sm mt-1">{formErrors.numberOfGuests}</div>
+              )}
+            </div>
+            {numberOfNights > 0 && (
+              <div className="py-3 px-4 border-t">
+                <label className="block mb-1">Your full name:</label>
+                <input 
+                  type="text" 
+                  value={name}
+                  onChange={ev => setName(ev.target.value)}
+                  className="w-full"
+                />
+                {formErrors.name && (
+                  <div className="text-red-500 text-sm mt-1">{formErrors.name}</div>
+                )}
+                <label className="block mb-1 mt-3">Your phone number:</label>
+                <input 
+                  type="tel" 
+                  value={phone}
+                  onChange={ev => setPhone(ev.target.value)}
+                  className="w-full"
+                />
+                {formErrors.phone && (
+                  <div className="text-red-500 text-sm mt-1">{formErrors.phone}</div>
+                )}
+              </div>
+            )}
+          </div>
+          <button 
+            onClick={bookThisPlace} 
+            disabled={bookingInProgress}
+            className={`primary mt-4 w-full py-3 ${bookingInProgress ? 'opacity-70 cursor-not-allowed' : ''}`}
+          >
+            {bookingInProgress ? 'Booking...' : (
+              <>
                 Book this place
                 {numberOfNights > 0 && (
-                    <span> ${numberOfNights * place.price} </span>
+                  <span> ${numberOfNights * place.price}</span>
                 )}
-            </button>
+              </>
+            )}
+          </button>
         </div>
-    )
-}
+      );
+    }
