@@ -1,4 +1,5 @@
 require('dotenv').config()
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 const { body, validationResult } = require('express-validator');
 const express = require("express")
 const cors = require("cors")
@@ -98,30 +99,36 @@ app.post("/register", registerValidation, async (req, res) => {
 
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
+    // Find user
     const userDoc = await User.findOne({ email })
-    if (userDoc) {
-        const passOk = bcrypt.compareSync(password, userDoc.password)
-        if (passOk) {
-            jwt.sign({
-                email: userDoc.email,
-                id: userDoc._id,
-            }, jwtSecret, {}, (err, token) => {
-                if (err) throw err;
 
-                // Define cookie options with enhanced security
-                const cookieOptions = {
-                    httpOnly: true,
-                    sameSite: 'lax',
-                    maxAge: 30 * 24 * 60 * 60 * 1000
-                };
-                res.cookie('token', token, cookieOptions).json(userDoc)
-            })
-        } else {
-            res.status(422).json('pass not ok')
-        }
-    } else {
-        res.json('not found')
+    // Check if user exists
+    if (!userDoc) {
+        console.log(`Login attempt with non-existent email: ${email}`);
+        return res.status(401).json({ error: 'Invalid email or password' });
     }
+    // Check password
+    const passOk = bcrypt.compareSync(password, userDoc.password)
+    
+    if (!passOk) {
+        console.log(`Login attempt with incorrect password for: ${email}`);
+        return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    jwt.sign({
+        email: userDoc.email,
+        id: userDoc._id,
+    }, jwtSecret, {}, (err, token) => {
+        if (err) throw err;
+
+        // Define cookie options with enhanced security
+        const cookieOptions = {
+            httpOnly: true,
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        };
+        res.cookie('token', token, cookieOptions).json(userDoc)
+    })
 })
 
 app.get("/profile", (req, res) => {
@@ -268,42 +275,42 @@ app.get('/bookings', async (req, res) => {
 
 app.get("/search-places", async (req, res) => {
     try {
-      const { query, minPrice, maxPrice, perks } = req.query;
-      
-      // Build the search conditions
-      let searchConditions = {};
-      
-      // Text search in title or address
-      if (query) {
-        searchConditions.$or = [
-          { title: { $regex: query, $options: 'i' } },
-          { address: { $regex: query, $options: 'i' } },
-          { description: { $regex: query, $options: 'i' } }
-        ];
-      }
-      
-      // Price range
-      if (minPrice !== undefined || maxPrice !== undefined) {
-        searchConditions.price = {};
-        if (minPrice !== undefined) searchConditions.price.$gte = parseInt(minPrice);
-        if (maxPrice !== undefined) searchConditions.price.$lte = parseInt(maxPrice);
-      }
-      
-      // Perks/amenities
-      if (perks && perks.length) {
-        const perksArray = Array.isArray(perks) ? perks : [perks];
-        searchConditions.perks = { $all: perksArray };
-      }
-      
-      const places = await Place.find(searchConditions).limit(50);
-      res.json(places);
+        const { query, minPrice, maxPrice, perks } = req.query;
+
+        // Build the search conditions
+        let searchConditions = {};
+
+        // Text search in title or address
+        if (query) {
+            searchConditions.$or = [
+                { title: { $regex: query, $options: 'i' } },
+                { address: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } }
+            ];
+        }
+
+        // Price range
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            searchConditions.price = {};
+            if (minPrice !== undefined) searchConditions.price.$gte = parseInt(minPrice);
+            if (maxPrice !== undefined) searchConditions.price.$lte = parseInt(maxPrice);
+        }
+
+        // Perks/amenities
+        if (perks && perks.length) {
+            const perksArray = Array.isArray(perks) ? perks : [perks];
+            searchConditions.perks = { $all: perksArray };
+        }
+
+        const places = await Place.find(searchConditions).limit(50);
+        res.json(places);
     } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Error searching places", 
-        error: error.message 
-      });
+        res.status(500).json({
+            success: false,
+            message: "Error searching places",
+            error: error.message
+        });
     }
 });
-  
+
 app.listen(4001)
