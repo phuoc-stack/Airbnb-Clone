@@ -1,5 +1,5 @@
 require('dotenv').config()
-
+const { body, validationResult } = require('express-validator');
 const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
@@ -41,7 +41,48 @@ function getUserDataFromReq(req) {
     })
 }
 
-app.post("/register", async (req, res) => {
+// Validation middleware
+const registerValidation = [
+    body('name').notEmpty().withMessage('Name is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('password')
+        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+        .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+        .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+        .matches(/[0-9]/).withMessage('Password must contain at least one number')
+];
+
+const placeValidation = [
+    body('title').notEmpty().withMessage('Title is required'),
+    body('address').notEmpty().withMessage('Address is required'),
+    body('description').notEmpty().withMessage('Description is required'),
+    body('checkIn').notEmpty().withMessage('Check-in time is required'),
+    body('checkOut').notEmpty().withMessage('Check-out time is required'),
+    body('maxGuests').isInt({ min: 1 }).withMessage('Maximum guests must be at least 1'),
+    body('price').isFloat({ min: 1 }).withMessage('Price must be greater than zero')
+];
+
+const bookingValidation = [
+    body('checkIn').isISO8601().withMessage('Valid check-in date required'),
+    body('checkOut').isISO8601().withMessage('Valid check-out date required')
+        .custom((value, { req }) => {
+            if (new Date(value) <= new Date(req.body.checkIn)) {
+                throw new Error('Check-out date must be after check-in date');
+            }
+            return true;
+        }),
+    body('numberOfGuests').isInt({ min: 1 }).withMessage('At least one guest required'),
+    body('name').notEmpty().withMessage('Name is required'),
+    body('phone').notEmpty().withMessage('Phone number is required'),
+];
+
+app.post("/register", registerValidation, async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { name, email, password } = req.body
     try {
         const userDoc = await User.create({
@@ -69,9 +110,9 @@ app.post("/login", async (req, res) => {
 
                 // Define cookie options with enhanced security
                 const cookieOptions = {
-                    httpOnly: true,             
-                    sameSite: 'lax',         
-                    maxAge: 30 * 24 * 60 * 60 * 1000 
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    maxAge: 30 * 24 * 60 * 60 * 1000
                 };
                 res.cookie('token', token, cookieOptions).json(userDoc)
             })
@@ -135,7 +176,12 @@ app.post('/upload', photosMiddleware.array('photos', 100), (req, res) => {
     res.json(uploadedFiles)
 })
 
-app.post('/places', (req, res) => {
+app.post('/places', placeValidation, (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { token } = req.cookies;
     const {
         title, address, addedPhotos, description, extraInfo,
@@ -165,7 +211,12 @@ app.get('/places/:id', async (req, res) => {
     res.json(await Place.findById(id))
 })
 
-app.put('/places/', async (req, res) => {
+app.put('/places/', placeValidation, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { token } = req.cookies;
     const {
         id, title, address, addedPhotos, description, extraInfo,
@@ -190,7 +241,12 @@ app.get("/places", async (req, res) => {
     res.json(await Place.find())
 })
 
-app.post("/bookings", async (req, res) => {
+app.post("/bookings", bookingValidation, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const userData = await getUserDataFromReq(req)
     const {
         place, checkIn, checkOut, numberOfGuests, name, phone, price
